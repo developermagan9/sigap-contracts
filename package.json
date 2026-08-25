@@ -1,0 +1,18 @@
+{
+  "name": "sigap-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Smart contracts SIGAP-Bansos (BansosRegistry, BansosDisbursement) — docs/06-Smart-Contract-Design.md",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.1.0",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.0",
+    "typescript": "^5.7.3"
+  }
+}
