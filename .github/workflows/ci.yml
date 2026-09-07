@@ -1,0 +1,45 @@
+# CI sigap-contracts — 15-Checklist-Belum-Terimplementasi.md item K + temuan #7.
+#
+# Dipindahkan dari `.github/workflows/ci.yml` monorepo. Versi lama itu tidak
+# pernah ter-trigger: file-nya duduk di root monorepo yang bukan git repo,
+# sementara tiap service adalah repo terpisah. Path di sini relatif ke root repo
+# `sigap-contracts`, jadi `working-directory: sigap-contracts` yang lama dibuang.
+#
+# CATATAN: repo ini BELUM punya git remote, jadi workflow ini belum pernah
+# dijalankan GitHub. Ia aktif begitu repo dibuat dan commit-nya di-push —
+# tidak ada yang perlu diubah di file ini saat itu terjadi.
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+# PR yang di-push berkali-kali membatalkan run sebelumnya — hemat runner.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  contracts:
+    name: hardhat compile + test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      # `hardhat test` mengompilasi sendiri kalau perlu, tapi memisahkannya
+      # membuat kegagalan kompilasi Solidity terbaca sebagai langkah sendiri
+      # alih-alih terkubur di output test.
+      - run: npm run compile
+
+      - run: npm test
