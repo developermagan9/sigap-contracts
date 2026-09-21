@@ -6,10 +6,8 @@ import * as path from "path";
  * Deploy BansosRegistry + BansosDisbursement (+ MockIDRXTest kalau belum ada
  * DANA_TOKEN_ADDRESS di env) ke network yang dipilih lewat --network.
  *
- * BELUM PERNAH DIJALANKAN terhadap testnet sungguhan — sigap-api/.env masih berisi
- * ADMIN_PRIVATE_KEY placeholder ("0x_your_deployer_private_key"), jadi tidak ada
- * wallet deployer terdanai untuk benar-benar mengeksekusi ini di Polygon Amoy.
- * Jalankan manual setelah private key testnet asli terisi:
+ * Chain lokal (tanpa saldo sungguhan):  npm run node  lalu  npm run deploy:local
+ * Polygon Amoy (butuh POL testnet dari faucet di wallet ADMIN_PRIVATE_KEY):
  *   npm run deploy:amoy
  */
 async function main() {
@@ -38,6 +36,12 @@ async function main() {
     await token.waitForDeployment();
     tokenAddress = await token.getAddress();
     console.log("MockIDRXTest:", tokenAddress);
+
+    // Bekal token uji untuk wallet admin, supaya `POST /periode-program/:id/danai-kontrak`
+    // di sigap-api langsung bisa dipakai. Hanya untuk token mock — token asli tidak di-mint.
+    const BEKAL = 1_000_000_000_000n; // Rp1 triliun dalam unit token (1 unit = Rp1)
+    await (await token.mint(deployer.address, BEKAL)).wait();
+    console.log("Mint bekal ke deployer:", BEKAL.toString());
   } else {
     console.log("\nMemakai DANA_TOKEN_ADDRESS dari env:", tokenAddress);
   }
@@ -88,6 +92,8 @@ function tulisEnvLocalchain(registry: string, disbursement: string, token: strin
     `DANA_TOKEN_ADDRESS=${token}`,
     "EXPLORER_BASE_URL=",
     "CLAIM_SYNC_INTERVAL_MS=5000",
+    "# UI dev boleh di :3000 atau :3100 (port 3000 sering dipakai aplikasi lain — docs/10 §7).",
+    "CORS_ORIGIN=http://localhost:3000,http://localhost:3100",
     "",
   ].join("\n");
   const tujuan = path.join(apiDir, ".env.localchain");
