@@ -2,10 +2,12 @@
   "name": "sigap-contracts",
   "version": "0.1.0",
   "private": true,
-  "description": "Smart contracts SIGAP-Bansos (BansosRegistry, BansosDisbursement) — docs/06-Smart-Contract-Design.md",
+  "description": "Smart contracts SIGAP-Bansos (BansosRegistry, BansosDisbursement) \u2014 docs/06-Smart-Contract-Design.md",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
+    "node": "hardhat node --hostname 127.0.0.1 --port 8545",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
     "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy"
   },
   "devDependencies": {

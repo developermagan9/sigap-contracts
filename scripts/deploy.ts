@@ -1,4 +1,6 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
+import * as fs from "fs";
+import * as path from "path";
 
 /**
  * Deploy BansosRegistry + BansosDisbursement (+ MockIDRXTest kalau belum ada
@@ -58,6 +60,39 @@ async function main() {
   console.log(`REGISTRY_CONTRACT_ADDRESS="${registryAddress}"`);
   console.log(`DISBURSEMENT_CONTRACT_ADDRESS="${disbursementAddress}"`);
   console.log(`DANA_TOKEN_ADDRESS="${tokenAddress}"`);
+
+  if (network.name === "localhost") tulisEnvLocalchain(registryAddress, disbursementAddress, tokenAddress!);
+}
+
+/**
+ * Chain lokal di-reset setiap `npx hardhat node` dinyalakan ulang, jadi alamat
+ * kontrak ditulis langsung ke sigap-api/.env.localchain (dibaca `npm run
+ * start:localchain`) — tidak perlu salin-tempel setiap kali. Hanya untuk
+ * `--network localhost`; alamat testnet tetap disalin manual ke .env.
+ */
+function tulisEnvLocalchain(registry: string, disbursement: string, token: string) {
+  const apiDir = path.resolve(__dirname, "../../sigap-api");
+  if (!fs.existsSync(apiDir)) {
+    console.log(`\n(sigap-api tidak ditemukan di ${apiDir} — .env.localchain tidak ditulis)`);
+    return;
+  }
+  const isi = [
+    "# DIBUAT OTOMATIS oleh sigap-contracts/scripts/deploy.ts --network localhost — jangan diedit manual.",
+    "# Menimpa sigap-api/.env saat API dijalankan dengan `npm run start:localchain`.",
+    "# Private key = akun #0 bawaan Hardhat (dipublikasikan Hardhat, HANYA untuk chain lokal 31337).",
+    "RPC_URL=http://127.0.0.1:8545",
+    "CHAIN_ID=31337",
+    "ADMIN_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    `REGISTRY_CONTRACT_ADDRESS=${registry}`,
+    `DISBURSEMENT_CONTRACT_ADDRESS=${disbursement}`,
+    `DANA_TOKEN_ADDRESS=${token}`,
+    "EXPLORER_BASE_URL=",
+    "CLAIM_SYNC_INTERVAL_MS=5000",
+    "",
+  ].join("\n");
+  const tujuan = path.join(apiDir, ".env.localchain");
+  fs.writeFileSync(tujuan, isi);
+  console.log(`\n✓ Alamat kontrak ditulis ke ${tujuan}`);
 }
 
 main().catch((err) => {
