@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { keccak256, toUtf8Bytes, ZeroHash } from "ethers";
 import { buildRoot, computeLeafHash, generateProof } from "./helpers/merkle";
 
@@ -197,5 +198,53 @@ describe("BansosDisbursement", () => {
         disbursement.connect(recipients_[i]).claim(777, recipients_[i].address, NOMINAL, nikHashes[i], proof),
       ).to.not.be.reverted;
     }
+  });
+
+  describe("batas klaim & tarik sisa dana", () => {
+    it("setBatasKlaim hanya untuk admin, harus di masa depan, dan hanya boleh diperpanjang", async () => {
+      const { disbursement, admin, attacker } = await deployFixture();
+      const now = await time.latest();
+
+      await expect(disbursement.connect(attacker).setBatasKlaim(PERIODE_ID, now + 3600)).to.be.revertedWith("Bukan admin");
+      await expect(disbursement.connect(admin).setBatasKlaim(PERIODE_ID, now - 1)).to.be.revertedWith("Batas klaim harus di masa depan");
+
+      await expect(disbursement.connect(admin).setBatasKlaim(PERIODE_ID, now + 3600))
+        .to.emit(disbursement, "BatasKlaimDitetapkan").withArgs(PERIODE_ID, now + 3600);
+      await expect(disbursement.connect(admin).setBatasKlaim(PERIODE_ID, now + 1800)).to.be.revertedWith("Batas klaim hanya boleh diperpanjang");
+      await disbursement.connect(admin).setBatasKlaim(PERIODE_ID, now + 7200);
+      expect(await disbursement.batasKlaim(PERIODE_ID)).to.equal(now + 7200);
+    });
+
+    it("klaim setelah batas ditolak; sisa dana bisa ditarik admin ke alamat tujuan", async () => {
+      const { disbursement, token, admin, attacker, governance, recipients, nikHashes, leafHashes } = await deployFixture();
+      const batas = (await time.latest()) + 3600;
+      await disbursement.connect(admin).setBatasKlaim(PERIODE_ID, batas);
+
+      // r1 sempat klaim sebelum batas
+      await disbursement.connect(recipients[0]).claim(PERIODE_ID, recipients[0].address, NOMINAL, nikHashes[0], generateProof(leafHashes, 0));
+
+      // sebelum batas: sisa belum boleh ditarik
+      await expect(disbursement.connect(admin).tarikSisaDana(PERIODE_ID, governance.address)).to.be.revertedWith("Masa klaim belum berakhir");
+
+      await time.increaseTo(batas + 1);
+      await expect(
+        disbursement.connect(recipients[1]).claim(PERIODE_ID, recipients[1].address, NOMINAL, nikHashes[1], generateProof(leafHashes, 1)),
+      ).to.be.revertedWith("Masa klaim sudah berakhir");
+
+      await expect(disbursement.connect(attacker).tarikSisaDana(PERIODE_ID, attacker.address)).to.be.revertedWith("Bukan admin");
+
+      const before = await token.balanceOf(governance.address);
+      await expect(disbursement.connect(admin).tarikSisaDana(PERIODE_ID, governance.address))
+        .to.emit(disbursement, "SisaDanaDitarik").withArgs(PERIODE_ID, governance.address, NOMINAL * 2n);
+      expect(await token.balanceOf(governance.address)).to.equal(before + NOMINAL * 2n);
+      expect(await disbursement.saldoPeriode(PERIODE_ID)).to.equal(0);
+
+      await expect(disbursement.connect(admin).tarikSisaDana(PERIODE_ID, governance.address)).to.be.revertedWith("Tidak ada sisa dana");
+    });
+
+    it("tanpa batas klaim, sisa dana tidak bisa ditarik", async () => {
+      const { disbursement, admin, governance } = await deployFixture();
+      await expect(disbursement.connect(admin).tarikSisaDana(PERIODE_ID, governance.address)).to.be.revertedWith("Masa klaim belum berakhir");
+    });
   });
 });
