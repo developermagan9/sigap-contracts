@@ -167,7 +167,7 @@ Dua pengaturan lain di `sigap-ui/.env.example` tidak perlu diisi untuk jaringan 
 
 ### Langkah 5: siapkan wallet penerima
 
-Impor salah satu akun uji ke MetaMask dengan kunci privat yang ditampilkan di terminal 1, misalnya akun nomor 1. Alamat akun itulah yang diisi sebagai wallet penerima saat pendataan.
+Impor salah satu akun uji ke MetaMask dengan kunci privat yang ditampilkan di terminal 1, misalnya akun nomor 1. Alamat akun itulah yang diisi sebagai wallet penerima saat pendataan. Daftar alamat akun 0 sampai 19 ada di [`docs/wallet-testing.md`](docs/wallet-testing.md).
 
 Jaringan Hardhat tidak perlu ditambahkan dengan tangan: saat penerima menekan klaim, tampilan meminta MetaMask berpindah ke jaringan `31337` atau menambahkannya. Kalau tetap ingin menambahkannya sendiri, isinya:
 
@@ -197,7 +197,7 @@ Petugas dan verifikator hanya bisa bekerja di wilayah kewenangannya. Akun seed m
 Nama menu dan tombol di bawah sama dengan yang tampil di aplikasi.
 
 1. Login sebagai `admin`, buat periode lewat menu **Periode Baru**. Lalu di **Dashboard Program**, klik **Jadikan aktif** pada periode itu. Semua halaman bekerja pada periode yang sedang aktif.
-2. Login sebagai `petugas`, buka **Form Input**, lalu masukkan beberapa keluarga di desa Mekarsari atau Balecatur. Isi kolom wallet dengan alamat akun uji Hardhat, satu alamat untuk satu keluarga. NIK dan nomor KK harus 16 digit.
+2. Login sebagai `petugas`, buka **Form Input**, lalu masukkan beberapa keluarga di desa Mekarsari atau Balecatur. Isi kolom wallet dengan alamat akun uji Hardhat dari [`docs/wallet-testing.md`](docs/wallet-testing.md), satu alamat untuk satu keluarga. NIK dan nomor KK harus 16 digit.
 3. Login sebagai `verifikator`, buka **Verifikasi Data**, lalu setujui data tersebut.
 4. Login sebagai `admin`, lalu berurutan:
    - **Analisis Clustering**: klik **Jalankan clustering**.
@@ -264,6 +264,7 @@ Tanpa `DANA_TOKEN_ADDRESS` di `.env`, skrip memasang `MockIDRXTest` sebagai toke
 |---|---|
 | `contracts/` | Kode Solidity |
 | `scripts/deploy.ts` | Skrip pemasangan kontrak |
+| `docs/wallet-testing.md` | Daftar alamat wallet uji (akun Hardhat 0 sampai 19) dan cara memakainya |
 | `test/` | Pengujian Hardhat |
 | `.github/workflows/ci.yml` | CI: kompilasi dan test di setiap push ke `main` atau `develop` dan di setiap pull request |
 
