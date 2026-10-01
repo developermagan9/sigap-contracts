@@ -45,17 +45,13 @@ Saat `npm run node` dinyalakan, akun nomor 0 sampai 19 masing-masing mendapat 10
 4. **Impor ke MetaMask sebelum mengklaim.** Impor akun yang sama dengan kunci privat dari langkah 1, supaya MetaMask bisa menandatangani klaim dari alamat itu.
 5. **Cek hasilnya.** Setelah periode disahkan dan didanai, buka Cek Status Bansos (`/cek-status`), masukkan alamat yang sama, lalu klaim.
 
-## Kalau butuh lebih dari 19 penerima
+## Melihat atau menambah alamat
 
-Turunkan alamat berikutnya dari frasa yang sama. Contoh untuk nomor 20 sampai 39, dijalankan di folder repo ini setelah `npm install`:
+Cetak daftar di terminal, dari folder repo ini setelah `npm install`:
 
 ```bash
-node -e '
-const { HDNodeWallet } = require("ethers");
-const frasa = "test test test test test test test test test test test junk";
-for (let i = 20; i < 40; i++)
-  console.log(i, HDNodeWallet.fromPhrase(frasa, undefined, `m/44\x27/60\x27/0\x27/0/${i}`).address);
-'
+npm run wallets          # nomor 0 sampai 19
+npm run wallets -- 40    # nomor 0 sampai 39
 ```
 
-Akun nomor 20 ke atas tidak punya saldo ETH di jaringan lokal. Untuk pendataan itu tidak masalah. Supaya bisa mengklaim, kirimi dulu sedikit ETH dari akun nomor 0.
+Alamat nomor 20 ke atas diturunkan dari frasa yang sama. Mereka tidak punya saldo ETH di jaringan lokal. Untuk pendataan itu tidak masalah. Supaya bisa mengklaim, kirimi dulu sedikit ETH dari akun nomor 0.

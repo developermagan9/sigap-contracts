@@ -8,6 +8,7 @@
     "test": "hardhat test",
     "node": "hardhat node --hostname 127.0.0.1 --port 8545",
     "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "wallets": "node scripts/daftar-wallet.js",
     "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy"
   },
   "devDependencies": {

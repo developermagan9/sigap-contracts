@@ -192,6 +192,31 @@ Dibuat oleh `npm run prisma:seed`. Semua untuk keperluan uji.
 
 Petugas dan verifikator hanya bisa bekerja di wilayah kewenangannya. Akun seed memegang dua desa: Mekarsari, Ciparay (`32.04.29.2003`) dan Balecatur, Gamping, Sleman (`34.04.01.2001`). Pilih salah satunya saat mendata.
 
+## Wallet untuk testing
+
+Wallet penerima diisi saat pendataan dan dipakai untuk klaim. Semuanya akun uji bawaan Hardhat. Ada tiga cara melihat datanya:
+
+| Cara | Perintah atau lokasi | Hasil |
+|---|---|---|
+| Baca daftarnya | [`docs/wallet-testing.md`](docs/wallet-testing.md) | Tabel alamat akun 0 sampai 19 beserta peruntukannya |
+| Cetak di terminal | `npm run wallets` di folder `sigap-contracts` | 20 alamat, satu per baris. `npm run wallets -- 40` mencetak 40 alamat |
+| Lihat bersama kunci privatnya | Terminal 1 (`npm run node`) | Tiap "Account #n" beserta kunci privatnya, untuk diimpor ke MetaMask |
+
+Contoh keluaran `npm run wallets`:
+
+```
+  0  0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266  (admin dan deployer, bukan penerima)
+  1  0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+  2  0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+```
+
+Nomor di sini sama dengan "Account #n" di terminal 1. Aturan pakainya:
+
+- Akun nomor 0 adalah admin dan deployer. Jangan dipakai sebagai penerima.
+- Akun nomor 1 sampai 19 dipakai sebagai penerima. Masing-masing punya ETH untuk biaya gas klaim. Akun nomor 20 ke atas tidak punya saldo.
+- Satu alamat untuk satu keluarga dalam satu periode.
+- Kunci privat tidak disimpan di repo. Ambil dari output `npm run node`.
+
 ## Mencoba alurnya
 
 Nama menu dan tombol di bawah sama dengan yang tampil di aplikasi.
@@ -265,6 +290,7 @@ Tanpa `DANA_TOKEN_ADDRESS` di `.env`, skrip memasang `MockIDRXTest` sebagai toke
 | `contracts/` | Kode Solidity |
 | `scripts/deploy.ts` | Skrip pemasangan kontrak |
 | `docs/wallet-testing.md` | Daftar alamat wallet uji (akun Hardhat 0 sampai 19) dan cara memakainya |
+| `scripts/daftar-wallet.js` | Mencetak alamat wallet uji lewat `npm run wallets` |
 | `test/` | Pengujian Hardhat |
 | `.github/workflows/ci.yml` | CI: kompilasi dan test di setiap push ke `main` atau `develop` dan di setiap pull request |
 
